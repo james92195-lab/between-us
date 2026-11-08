@@ -1,38 +1,43 @@
 # Between Us
 
-App to loan money between friends with a money jar to donate change.
+Interest-free loans between friends, plus a jar for the spare change.
 
-## Features
-- Circles of friends for shared lending
-- Track loans / IOUs ("marks")
-- Money jar for spare change donations
-- Transaction log
-- Sell / marketplace elements (WIP)
+Someone pays. The bill splits evenly. Each share can round up to the next dollar, and that extra sits in a jar you give to a cause you name. Paybacks are recorded. Nobody is charged interest.
 
-## Running Locally
+The sample circle (you, Maya, Jonah, Priya) is there so the books aren’t empty. Start a blank circle from the Circle tab. Everything stays in the browser on that device.
+
+## Running locally
+
 ```bash
 npm install
 npm run dev
 ```
 
-## Deploying to GitHub + Vercel (recommended)
-1. Push this repo to GitHub (already done if you're reading this).
-2. Connect the repo to Vercel: import project at vercel.com.
-3. Set environment variables if using a real DB (Postgres via Vercel or Neon).
-4. The app uses Nitro preset for Vercel and falls back to PGLite for local/dev.
+## Sell hosting, not the loans
 
-The build outputs to `.vercel/output` and can be deployed with `npx nitro deploy --prebuilt`.
+Loans stay at zero interest. Charge for keeping the circle: hosting, upkeep, your time.
 
-## Selling the App
-This project is licensed under AGPL-3.0.
-- You can sell the software, offer hosted versions, or charge for support.
-- AGPL requires that users of a modified network version can access the corresponding source code.
-- Perfect for open-source commercial models (e.g., sell a hosted SaaS while providing source).
+1. On the Sell tab, paste an `https://` payment link you already use (Stripe Payment Link, Ko-fi, GitHub Sponsors, or Venmo).
+2. Set a price, once or monthly, and a sentence about what they’re paying for.
+3. Copy the offer and send it.
 
-## Tech Stack
-- TanStack Start / React Router
-- Vite
-- Nitro (Vercel)
-- Zustand for state
-- Zod for validation
-- Tailwind CSS
+This project does not process cards.
+
+Licensed under **AGPL-3.0**.
+
+- You can sell the software, offer a hosted version, or charge for support.
+- If you run a modified copy as a service, people who use it can ask you for the source.
+- AGPL is a poor fit if you want to sell a closed version. Pick another license before you do that.
+
+## Deploy
+
+1. This repo is the app.
+2. Connect it to Vercel and import the project.
+3. You do not need a database for the ledger. Balances live on the device. Download `between-us.json` from the Sell tab if you want a backup.
+
+## What’s in the book
+
+- Circles of friends
+- Shared bills, paybacks, and a transaction log
+- A change jar you mark as given when you actually donate
+- An offer you can send when you want to charge for hosting
