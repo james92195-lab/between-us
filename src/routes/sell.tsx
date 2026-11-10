@@ -1,24 +1,27 @@
 import { createFileRoute } from "@tanstack/react-router";
 import { useState } from "react";
+import { useShallow } from "zustand/react/shallow";
+import { OfferCard, offerText } from "@/components/offer-card";
 import { Shell } from "@/components/shell";
-import { booksText, formatMoney, httpsUrl, parseCircle, type Circle, type Offer } from "@/lib/ledger";
+import { booksText, httpsUrl, parseCircle, type Circle, type Offer } from "@/lib/ledger";
+import { PAGES_URL, REPO_URL } from "@/lib/site";
 import { useLedger } from "@/lib/store";
 
 export const Route = createFileRoute("/sell")({ component: SellPage });
-
-const REPO = "https://github.com/james92195-lab/between-us";
 
 function SellPage() {
   const offer = useLedger((s) => s.offer);
   const setOffer = useLedger((s) => s.setOffer);
   const replaceAll = useLedger((s) => s.replaceAll);
-  const circle = useLedger((s) => ({
-    people: s.people,
-    entries: s.entries,
-    causeName: s.causeName,
-    goalCents: s.goalCents,
-    offer: s.offer,
-  }));
+  const circle = useLedger(
+    useShallow((s) => ({
+      people: s.people,
+      entries: s.entries,
+      causeName: s.causeName,
+      goalCents: s.goalCents,
+      offer: s.offer,
+    })),
+  );
   const [price, setPrice] = useState(offer.priceCents ? (offer.priceCents / 100).toFixed(2) : "");
   const [cadence, setCadence] = useState<Offer["cadence"]>(offer.cadence);
   const [url, setUrl] = useState(offer.paymentUrl);
@@ -35,34 +38,24 @@ function SellPage() {
     pitch: pitch.slice(0, 280),
   };
 
-  function save() {
+  function save(): boolean {
     if (url.trim() && !safeUrl) {
       setMessage("Payment links have to start with https:// — Stripe, Ko-fi, GitHub Sponsors, or Venmo.");
-      return;
+      return false;
     }
     if (price.trim() && !/^\d+(\.\d{1,2})?$/.test(price.trim().replace(/[$,]/g, ""))) {
       setMessage("Price should look like 8 or 8.00. Leave it blank to charge nothing.");
-      return;
+      return false;
     }
     setOffer(draft);
     setMessage("Offer saved on this device.");
+    return true;
   }
 
-  const pitchText = [
-    "Between Us",
-    draft.priceCents > 0
-      ? `${formatMoney(draft.priceCents)} ${draft.cadence === "month" ? "a month" : "once"} to keep our circle hosted.`
-      : "A free circle. No charge.",
-    draft.pitch,
-    draft.paymentUrl,
-    "",
-    booksText({ ...circle, offer: draft }),
-  ]
-    .filter(Boolean)
-    .join("\n");
+  const pitchText = offerText(draft, booksText({ ...circle, offer: draft }));
 
   async function copyOffer() {
-    save();
+    if (!save()) return;
     try {
       await navigator.clipboard.writeText(pitchText);
       setMessage("Offer copied. Send it however you already talk to them.");
@@ -77,10 +70,12 @@ function SellPage() {
         <p className="text-xs font-medium tracking-widest text-ember uppercase">Sell</p>
         <h1 className="mt-2 font-display text-4xl">Host the circle</h1>
         <p className="mt-2 text-muted">
-          Loans stay interest-free. What you can charge for is keeping the circle — hosting, upkeep, your time. This app
-          does not take cards.
+          Loans stay interest-free. Charge for keeping the circle — hosting, upkeep, your time. This app does not take
+          cards. People pay on the link you paste, then open the public copy.
         </p>
       </header>
+
+      <OfferCard offer={draft} />
 
       <section className="mb-5 rounded-3xl border border-line bg-card p-4">
         <label className="block">
@@ -161,16 +156,20 @@ function SellPage() {
       <section className="mb-5 rounded-3xl border border-line bg-card p-4">
         <h2 className="font-display text-2xl">Run it from GitHub</h2>
         <p className="mt-2 text-sm text-muted">
-          The repo is {""}
-          <a className="underline" href={REPO}>
+          The public copy is{" "}
+          <a className="underline" href={PAGES_URL}>
+            {PAGES_URL.replace("https://", "")}
+          </a>
+          . A push to <span className="text-ink">main</span> publishes that site. The source is{" "}
+          <a className="underline" href={REPO_URL}>
             james92195-lab/between-us
           </a>
-          , licensed AGPL-3.0. You can charge for a hosted copy and for support. If you serve the app to other people,
-          AGPL means they can ask you for the source. It is a poor fit if you want to sell a closed version.
+          , licensed AGPL-3.0 — you can charge for hosting and support. If you serve a modified copy, people who use it
+          can ask you for the source. AGPL is a poor fit if you want to sell a closed version.
         </p>
         <p className="mt-3 text-sm text-muted">
-          Clone it, install dependencies, and run the dev script. Publish when you want a public link. Payments stay on
-          the link you paste above — Stripe Payment Links, Ko-fi, GitHub Sponsors, Venmo.
+          Want your own domain? Import the same repo on Vercel. You do not need a database. Download the circle below if
+          you want a backup. Payments stay on the link above.
         </p>
       </section>
 
@@ -186,13 +185,15 @@ function Backup({
   replaceAll: (circle: Circle) => void;
   onMessage: (message: string) => void;
 }) {
-  const snapshot = useLedger((s) => ({
-    people: s.people,
-    entries: s.entries,
-    causeName: s.causeName,
-    goalCents: s.goalCents,
-    offer: s.offer,
-  }));
+  const snapshot = useLedger(
+    useShallow((s) => ({
+      people: s.people,
+      entries: s.entries,
+      causeName: s.causeName,
+      goalCents: s.goalCents,
+      offer: s.offer,
+    })),
+  );
 
   function download() {
     const blob = new Blob([JSON.stringify(snapshot, null, 2)], { type: "application/json" });

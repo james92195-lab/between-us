@@ -10,6 +10,7 @@ import {
   nameOf,
   settlePlan,
 } from "@/lib/ledger";
+import { priceLine } from "@/components/offer-card";
 import { useLedger } from "@/lib/store";
 
 export const Route = createFileRoute("/")({ component: Home });
@@ -19,6 +20,7 @@ function Home() {
   const entries = useLedger((s) => s.entries);
   const causeName = useLedger((s) => s.causeName);
   const goalCents = useLedger((s) => s.goalCents);
+  const offer = useLedger((s) => s.offer);
   const you = people.find((person) => person.isYou) ?? people[0];
   const bal = balances(people, entries);
   const yours = you ? (bal[you.id] ?? 0) : 0;
@@ -44,6 +46,21 @@ function Home() {
         )}
         <p className="mt-3 max-w-md text-sm text-muted">Interest-free. Log who paid, split it, and let the spare change collect.</p>
       </header>
+
+      {offer.priceCents > 0 && offer.paymentUrl && (
+        <a
+          href={offer.paymentUrl}
+          target="_blank"
+          rel="noreferrer"
+          className="mb-4 flex items-center justify-between gap-3 rounded-3xl bg-ember px-4 py-3 text-paper"
+        >
+          <span>
+            <span className="block text-xs tracking-widest uppercase">Hosting</span>
+            <span className="font-display text-2xl">{priceLine(offer)}</span>
+          </span>
+          <span className="inline-flex h-11 items-center rounded-full bg-paper px-4 text-sm text-ink">Pay</span>
+        </a>
+      )}
 
       <section className="mb-4 rounded-3xl border border-line bg-card p-3">
         <ul>

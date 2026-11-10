@@ -1,5 +1,6 @@
 import { createFileRoute } from "@tanstack/react-router";
 import { useState } from "react";
+import { useShallow } from "zustand/react/shallow";
 import { PersonMark } from "@/components/marks";
 import { Shell } from "@/components/shell";
 import { balances, booksText, formatMoney } from "@/lib/ledger";
@@ -15,13 +16,15 @@ function CirclePage() {
   const removePerson = useLedger((s) => s.removePerson);
   const loadDemo = useLedger((s) => s.loadDemo);
   const startBlank = useLedger((s) => s.startBlank);
-  const circle = useLedger((s) => ({
-    people: s.people,
-    entries: s.entries,
-    causeName: s.causeName,
-    goalCents: s.goalCents,
-    offer: s.offer,
-  }));
+  const circle = useLedger(
+    useShallow((s) => ({
+      people: s.people,
+      entries: s.entries,
+      causeName: s.causeName,
+      goalCents: s.goalCents,
+      offer: s.offer,
+    })),
+  );
   const [name, setName] = useState("");
   const [error, setError] = useState("");
   const [confirm, setConfirm] = useState<"blank" | "demo" | null>(null);

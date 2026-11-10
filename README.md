@@ -15,24 +15,35 @@ npm run dev
 
 Open http://localhost:8080
 
+## Run it on GitHub
+
+The public site is [james92195-lab.github.io/between-us](https://james92195-lab.github.io/between-us/).
+
+Pushing to `main` builds a static copy and publishes it with GitHub Pages. Books stay in the browser. You do not need a database.
+
+```bash
+npm install
+npm run dev          # local preview
+npm run build:pages  # the static site GitHub Pages serves
+```
+
 ## Sell hosting, not the loans
 
 Loans stay at zero interest. Charge for keeping the circle: hosting, upkeep, your time.
 
 1. On the **Sell** tab, paste an `https://` payment link you already use (Stripe Payment Link, Ko-fi, GitHub Sponsors, or Venmo).
 2. Set a price (once or monthly) and a short sentence about what they’re paying for.
-3. Copy the offer and send it the way you already talk to the circle.
+3. Copy the offer. It includes the live site and the current books.
 
-This project does not process cards.
+This project does not process cards. Paying is optional — the app does not lock the books behind a paywall.
 
 ### Example offer you can copy
 
 > Between Us  
 > $8.00 a month to keep our circle hosted.  
 > Hosting, backups, and the occasional quiet fix so the books stay simple.  
-> https://buy.stripe.com/your-link  
->
-> [the current books are attached automatically when you copy from the app]
+> Pay: https://buy.stripe.com/your-link  
+> Open the app: https://james92195-lab.github.io/between-us/
 
 Licensed under **AGPL-3.0**.
 
@@ -40,13 +51,11 @@ Licensed under **AGPL-3.0**.
 - If you run a modified copy as a service, people who use it can ask you for the source.
 - AGPL is a poor fit if you want to sell a closed version. Pick another license before you do that.
 
-## Deploy from GitHub
+## Your own domain
 
-1. This repo is the app. Connect it to [Vercel](https://vercel.com) and import the project (Nitro preset is already set).
-2. You do not need a database for the ledger. Balances live on the device. Download `between-us.json` from the Sell tab if you want a backup.
-3. CI (typecheck + tests + build) runs on every push and pull request.
+Import this repo on [Vercel](https://vercel.com) if you want a custom domain (the Nitro preset is already set). GitHub Pages is the free public copy. Download `between-us.json` from the Sell tab if you want a backup.
 
-After it is live you can put the URL on the Sell tab and start charging for hosting.
+CI (typecheck + tests + build) runs on every push and pull request.
 
 ## What’s in the book
 
