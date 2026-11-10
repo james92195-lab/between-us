@@ -4,7 +4,7 @@ import { useShallow } from "zustand/react/shallow";
 import { OfferCard, offerText } from "@/components/offer-card";
 import { Shell } from "@/components/shell";
 import { booksText, httpsUrl, parseCircle, type Circle, type Offer } from "@/lib/ledger";
-import { PAGES_URL, REPO_URL } from "@/lib/site";
+import { PAGES_SETTINGS_URL, PAGES_URL, REPO_URL } from "@/lib/site";
 import { useLedger } from "@/lib/store";
 
 export const Route = createFileRoute("/sell")({ component: SellPage });
@@ -139,6 +139,12 @@ function SellPage() {
           <button type="button" onClick={() => void copyOffer()} className="h-11 rounded-full border border-ink px-4 text-sm">
             Copy offer
           </button>
+          <a
+            href={`mailto:?subject=${encodeURIComponent("Between Us — hosting")}&body=${encodeURIComponent(pitchText)}`}
+            className="inline-flex h-11 items-center rounded-full border border-line bg-card px-4 text-sm"
+          >
+            Email offer
+          </a>
           {draft.paymentUrl && (
             <a
               href={draft.paymentUrl}
@@ -160,7 +166,12 @@ function SellPage() {
           <a className="underline" href={PAGES_URL}>
             {PAGES_URL.replace("https://", "")}
           </a>
-          . A push to <span className="text-ink">main</span> publishes that site. The source is{" "}
+          . A push to <span className="text-ink">main</span> builds it. GitHub will not serve the site until you turn Pages
+          on once: open{" "}
+          <a className="underline" href={PAGES_SETTINGS_URL}>
+            Pages settings
+          </a>{" "}
+          and set Source to <span className="text-ink">GitHub Actions</span>. The source is{" "}
           <a className="underline" href={REPO_URL}>
             james92195-lab/between-us
           </a>

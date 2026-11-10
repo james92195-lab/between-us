@@ -17,9 +17,15 @@ Open http://localhost:8080
 
 ## Run it on GitHub
 
-The public site is [james92195-lab.github.io/between-us](https://james92195-lab.github.io/between-us/).
+The public site is meant to live at [james92195-lab.github.io/between-us](https://james92195-lab.github.io/between-us/).
 
-Pushing to `main` builds a static copy and publishes it with GitHub Pages. Books stay in the browser. You do not need a database.
+Pushing to `main` builds a static copy. GitHub will only serve it after Pages is switched on **once**:
+
+1. Open [Pages settings](https://github.com/james92195-lab/between-us/settings/pages).
+2. Under **Build and deployment**, set **Source** to **GitHub Actions**.
+3. The `pages` workflow publishes `dist/pages-site`. Re-run it from the Actions tab if the first deploy failed before this switch.
+
+Books stay in the browser. You do not need a database.
 
 ```bash
 npm install
