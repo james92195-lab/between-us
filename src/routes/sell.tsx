@@ -4,7 +4,8 @@ import { useShallow } from "zustand/react/shallow";
 import { OfferCard, offerText } from "@/components/offer-card";
 import { Shell } from "@/components/shell";
 import { booksText, httpsUrl, parseCircle, type Circle, type Offer } from "@/lib/ledger";
-import { PAGES_SETTINGS_URL, PAGES_URL, REPO_URL } from "@/lib/site";
+import { offerSearch } from "@/lib/offer-link";
+import { PAGES_URL, REPO_URL } from "@/lib/site";
 import { useLedger } from "@/lib/store";
 
 export const Route = createFileRoute("/sell")({ component: SellPage });
@@ -53,14 +54,16 @@ function SellPage() {
   }
 
   const pitchText = offerText(draft, booksText({ ...circle, offer: draft }));
+  const ready = draft.priceCents > 0 && Boolean(draft.paymentUrl);
+  const publicLink = ready ? offerSearch(draft) : "";
 
-  async function copyOffer() {
+  async function copyText(value: string, ok: string) {
     if (!save()) return;
     try {
-      await navigator.clipboard.writeText(pitchText);
-      setMessage("Offer copied. Send it however you already talk to them.");
+      await navigator.clipboard.writeText(value);
+      setMessage(ok);
     } catch {
-      setMessage("Couldn’t copy automatically. Select the offer below.");
+      setMessage("Couldn’t copy automatically. Select the text below.");
     }
   }
 
@@ -128,6 +131,18 @@ function SellPage() {
         <button type="button" onClick={save} className="mt-3 h-11 rounded-full bg-ember px-5 text-sm font-medium text-paper">
           Save offer
         </button>
+        <button
+          type="button"
+          onClick={() => {
+            setPrice("8.00");
+            setCadence("month");
+            setPitch("Hosting, backups, and the occasional quiet fix so the books stay simple.");
+            setMessage("Sample filled in. Paste your own https payment link before you send it.");
+          }}
+          className="mt-3 ml-2 h-11 rounded-full border border-line px-4 text-sm"
+        >
+          Use $8 sample
+        </button>
       </section>
 
       <section className="mb-5">
@@ -136,11 +151,28 @@ function SellPage() {
           {pitchText}
         </pre>
         <div className="mt-3 flex flex-wrap gap-2">
-          <button type="button" onClick={() => void copyOffer()} className="h-11 rounded-full border border-ink px-4 text-sm">
+          <button
+            type="button"
+            onClick={() => void copyText(pitchText, "Offer copied. Send it however you already talk to them.")}
+            className="h-11 rounded-full border border-ink px-4 text-sm"
+          >
             Copy offer
           </button>
+          {publicLink && (
+            <button
+              type="button"
+              onClick={() =>
+                void copyText(publicLink, "Public link copied. Whoever opens it sees the Pay button on the live site.")
+              }
+              className="h-11 rounded-full bg-ember px-4 text-sm font-medium text-paper"
+            >
+              Copy public link
+            </button>
+          )}
           <a
-            href={`mailto:?subject=${encodeURIComponent("Between Us — hosting")}&body=${encodeURIComponent(pitchText)}`}
+            href={`mailto:?subject=${encodeURIComponent("Between Us — hosting")}&body=${encodeURIComponent(
+              publicLink ? `${pitchText}\n\nOpen and pay: ${publicLink}` : pitchText,
+            )}`}
             className="inline-flex h-11 items-center rounded-full border border-line bg-card px-4 text-sm"
           >
             Email offer
@@ -156,27 +188,28 @@ function SellPage() {
             </a>
           )}
         </div>
+        {publicLink && (
+          <p className="mt-3 text-sm break-all text-muted">
+            Public link: <span className="text-ink">{publicLink}</span>
+          </p>
+        )}
         {message && <p className="mt-3 text-sm text-muted">{message}</p>}
       </section>
 
       <section className="mb-5 rounded-3xl border border-line bg-card p-4">
         <h2 className="font-display text-2xl">Run it from GitHub</h2>
         <p className="mt-2 text-sm text-muted">
-          The public copy is{" "}
+          The public copy is live at{" "}
           <a className="underline" href={PAGES_URL}>
             {PAGES_URL.replace("https://", "")}
           </a>
-          . A push to <span className="text-ink">main</span> builds it. GitHub will not serve the site until you turn Pages
-          on once: open{" "}
-          <a className="underline" href={PAGES_SETTINGS_URL}>
-            Pages settings
-          </a>{" "}
-          and set Source to <span className="text-ink">GitHub Actions</span>. The source is{" "}
+          . A push to <span className="text-ink">main</span> rebuilds it. Paste a Stripe, Ko-fi, GitHub Sponsors, or
+          Venmo <span className="text-ink">https://</span> link, then copy the public offer link. Whoever opens that
+          link sees a Pay button. Loans stay interest-free — you are selling hosting, not the debt. Source:{" "}
           <a className="underline" href={REPO_URL}>
             james92195-lab/between-us
           </a>
-          , licensed AGPL-3.0 — you can charge for hosting and support. If you serve a modified copy, people who use it
-          can ask you for the source. AGPL is a poor fit if you want to sell a closed version.
+          , AGPL-3.0. If you serve a modified copy, people who use it can ask you for the source.
         </p>
         <p className="mt-3 text-sm text-muted">
           Want your own domain? Import the same repo on Vercel. You do not need a database. Download the circle below if

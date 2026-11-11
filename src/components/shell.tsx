@@ -1,6 +1,8 @@
 import { Link } from "@tanstack/react-router";
 import { BadgeDollarSign, House, NotebookPen, PiggyBank, UsersRound } from "lucide-react";
-import type { ReactNode } from "react";
+import { useEffect, type ReactNode } from "react";
+import { offerFromSearch } from "@/lib/offer-link";
+import { useLedger } from "@/lib/store";
 
 const NAV = [
   { to: "/", label: "Home", icon: House, exact: true },
@@ -11,6 +13,12 @@ const NAV = [
 ] as const;
 
 export function Shell({ children }: { children: ReactNode }) {
+  const setOffer = useLedger((s) => s.setOffer);
+  useEffect(() => {
+    const offered = offerFromSearch(window.location.search);
+    if (offered) setOffer(offered);
+  }, [setOffer]);
+
   return (
     <div className="min-h-screen bg-paper text-ink">
       <aside className="fixed inset-y-0 left-0 z-20 hidden w-56 flex-col border-r border-line bg-card px-4 py-6 md:flex">

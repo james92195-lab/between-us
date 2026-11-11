@@ -17,13 +17,9 @@ Open http://localhost:8080
 
 ## Run it on GitHub
 
-The public site is meant to live at [james92195-lab.github.io/between-us](https://james92195-lab.github.io/between-us/).
+The public site is live at [james92195-lab.github.io/between-us](https://james92195-lab.github.io/between-us/).
 
-Pushing to `main` builds a static copy. GitHub will only serve it after Pages is switched on **once**:
-
-1. Open [Pages settings](https://github.com/james92195-lab/between-us/settings/pages).
-2. Under **Build and deployment**, set **Source** to **GitHub Actions**.
-3. The `pages` workflow publishes `dist/pages-site`. Re-run it from the Actions tab if the first deploy failed before this switch.
+Pushing to `main` rebuilds that copy. Pages is already set to **GitHub Actions** (`pages` workflow, artifact `dist/pages-site`). If a later deploy 404s, that source switch is the one setting to check.
 
 Books stay in the browser. You do not need a database.
 
@@ -39,7 +35,8 @@ Loans stay at zero interest. Charge for keeping the circle: hosting, upkeep, you
 
 1. On the **Sell** tab, paste an `https://` payment link you already use (Stripe Payment Link, Ko-fi, GitHub Sponsors, or Venmo).
 2. Set a price (once or monthly) and a short sentence about what they’re paying for.
-3. Copy the offer. It includes the live site and the current books.
+3. **Copy public link.** That URL is the thing you sell. Whoever opens it on the GitHub Pages site sees a Pay button. The price rides in the link — there is no server to store it.
+4. Copy or email the longer offer if you also want the current books in the message.
 
 This project does not process cards. Paying is optional — the app does not lock the books behind a paywall.
 
