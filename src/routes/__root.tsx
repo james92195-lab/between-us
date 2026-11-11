@@ -13,7 +13,7 @@ export const Route = createRootRoute({
       { title: APP_NAME },
       {
         name: "description",
-        content: "Interest-free loans between friends, and a jar for the spare change.",
+        content: "Interest-free loans and a shared jar between friends. Records stay on this device until a bank transfer is actually approved.",
       },
       { name: "theme-color", content: "#f4efe6" },
     ],

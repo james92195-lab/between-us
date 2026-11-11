@@ -1,10 +1,20 @@
 # Between Us
 
-Interest-free loans between friends, plus a jar for the spare change.
+Interest-free loans between friends, and a shared jar for money the circle means to pool.
 
-Someone pays. The bill splits evenly. Each share can round up to the next dollar, and that extra sits in a jar you give to a cause you name. Paybacks are recorded. Nobody is charged interest.
+The book on this device can record who lent whom, manual repayments, jar members, promised contributions, and a withdrawal vote. It does not send bank transfers. Amounts are integer cents. A repayment you type is labeled as written down, not as a provider confirmation. Jar promises are not a spendable balance.
 
-The sample circle (you, Maya, Jonah, Priya) is there so the books aren’t empty. Start a blank circle from the Circle tab. Everything stays in the browser on that device.
+Friends do not share an account here. Names in the circle are not logins. “Circle” means that friends group, not a crypto network.
+
+## Jar votes
+
+A withdrawal needs yeses from **3 other active members of that jar**. The requester cannot approve it. Changing the amount, destination, or purpose voids those yeses. If fewer than 3 other active members exist, voting is blocked and the threshold stays 3. Three yeses mean the notebook policy passed. They do not move money.
+
+Custody of a real pooled jar is still undecided. See [docs/shared-jar.md](docs/shared-jar.md).
+
+## Payments
+
+US bank-to-bank transfers are aimed at Dwolla, and only after Dwolla’s peer-to-peer review. Nothing in this repo calls Dwolla, creates an account, or holds API keys. Live and sandbox sends stay off. See [docs/payments.md](docs/payments.md).
 
 ## Running locally
 
@@ -13,59 +23,14 @@ npm install
 npm run dev
 ```
 
-Open http://localhost:8080
-
-## Run it on GitHub
-
-The public site is meant to live at [james92195-lab.github.io/between-us](https://james92195-lab.github.io/between-us/).
-
-Pushing to `main` builds a static copy. GitHub will only serve it after Pages is switched on **once**:
-
-1. Open [Pages settings](https://github.com/james92195-lab/between-us/settings/pages).
-2. Under **Build and deployment**, set **Source** to **GitHub Actions**.
-3. The `pages` workflow publishes `dist/pages-site`. Re-run it from the Actions tab if the first deploy failed before this switch.
-
-Books stay in the browser. You do not need a database.
+Open the preview this workspace serves. `npm test` covers the money math, loan limits, the 3-person vote, and the Dwolla gate.
 
 ```bash
-npm install
-npm run dev          # local preview
-npm run build:pages  # the static site GitHub Pages serves
+npm run build:pages
 ```
 
-## Sell hosting, not the loans
+That builds the static book GitHub Pages can host. Pages cannot verify Dwolla webhooks or keep secrets. The live site changes only when `main` is updated. This branch does not deploy itself.
 
-Loans stay at zero interest. Charge for keeping the circle: hosting, upkeep, your time.
+## Data
 
-1. On the **Sell** tab, paste an `https://` payment link you already use (Stripe Payment Link, Ko-fi, GitHub Sponsors, or Venmo).
-2. Set a price (once or monthly) and a short sentence about what they’re paying for.
-3. Copy the offer. It includes the live site and the current books.
-
-This project does not process cards. Paying is optional — the app does not lock the books behind a paywall.
-
-### Example offer you can copy
-
-> Between Us  
-> $8.00 a month to keep our circle hosted.  
-> Hosting, backups, and the occasional quiet fix so the books stay simple.  
-> Pay: https://buy.stripe.com/your-link  
-> Open the app: https://james92195-lab.github.io/between-us/
-
-Licensed under **AGPL-3.0**.
-
-- You can sell the software, offer a hosted version, or charge for support.
-- If you run a modified copy as a service, people who use it can ask you for the source.
-- AGPL is a poor fit if you want to sell a closed version. Pick another license before you do that.
-
-## Your own domain
-
-Import this repo on [Vercel](https://vercel.com) if you want a custom domain (the Nitro preset is already set). GitHub Pages is the free public copy. Download `between-us.json` from the Sell tab if you want a backup.
-
-CI (typecheck + tests + build) runs on every push and pull request.
-
-## What’s in the book
-
-- Circles of friends
-- Shared bills, paybacks, and a transaction log
-- A change jar you mark as given when you actually donate
-- An offer you can send when you want to charge for hosting
+The book is stored in this browser under `between-us-book`. Download it from the Circle tab. Replacing the book from a file rejects anything that claims a bank already confirmed a contribution or a repayment.

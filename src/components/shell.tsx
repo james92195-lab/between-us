@@ -1,16 +1,20 @@
 import { Link } from "@tanstack/react-router";
-import { BadgeDollarSign, House, NotebookPen, PiggyBank, UsersRound } from "lucide-react";
+import { HandCoins, House, PiggyBank, UsersRound, Wallet } from "lucide-react";
 import type { ReactNode } from "react";
+import { useBook } from "@/lib/book-store";
+import { useBookHydrated } from "@/components/use-book-hydrated";
 
 const NAV = [
   { to: "/", label: "Home", icon: House, exact: true },
-  { to: "/log", label: "Log", icon: NotebookPen, exact: false },
-  { to: "/jar", label: "Jar", icon: PiggyBank, exact: false },
-  { to: "/circle", label: "Circle", icon: UsersRound, exact: false },
-  { to: "/sell", label: "Sell", icon: BadgeDollarSign, exact: false },
+  { to: "/loans", label: "Loans", icon: HandCoins, exact: false },
+  { to: "/jars", label: "Jar", icon: PiggyBank, exact: false },
+  { to: "/people", label: "Circle", icon: UsersRound, exact: false },
+  { to: "/payments", label: "Pay", icon: Wallet, exact: false },
 ] as const;
 
 export function Shell({ children }: { children: ReactNode }) {
+  const ready = useBookHydrated();
+  const warning = useBook((state) => state.storageWarning);
   return (
     <div className="min-h-screen bg-paper text-ink">
       <aside className="fixed inset-y-0 left-0 z-20 hidden w-56 flex-col border-r border-line bg-card px-4 py-6 md:flex">
@@ -22,12 +26,17 @@ export function Shell({ children }: { children: ReactNode }) {
           ))}
         </nav>
         <p className="mt-auto px-3 text-xs leading-relaxed text-muted">
-          The spare change from every bill can sit in the jar until you give it away.
+          Saved on this device only. Three yeses on a jar are a decision, not a bank transfer.
         </p>
       </aside>
       <div className="mx-auto w-full max-w-2xl px-4 pt-5 pb-28 md:pt-8 md:pr-8 md:pb-16 md:pl-64">
         <p className="mb-5 font-display text-2xl md:hidden">Between us</p>
-        {children}
+        {warning ? (
+          <p role="alert" className="mb-4 rounded-2xl border border-ember/40 bg-ember/10 px-3 py-2 text-sm">
+            {warning}
+          </p>
+        ) : null}
+        {ready ? children : <p className="text-muted">Opening the book…</p>}
       </div>
       <nav className="fixed inset-x-0 bottom-0 z-20 grid grid-cols-5 border-t border-line bg-card md:hidden">
         {NAV.map((item) => (
@@ -44,12 +53,8 @@ function SideLink({ item }: { item: (typeof NAV)[number] }) {
     <Link
       to={item.to}
       activeOptions={{ exact: item.exact }}
-      inactiveProps={{
-        className: "flex h-11 items-center gap-3 rounded-2xl px-3 text-sm text-muted",
-      }}
-      activeProps={{
-        className: "flex h-11 items-center gap-3 rounded-2xl px-3 text-sm bg-ink text-paper",
-      }}
+      inactiveProps={{ className: "flex h-11 items-center gap-3 rounded-2xl px-3 text-sm text-muted" }}
+      activeProps={{ className: "flex h-11 items-center gap-3 rounded-2xl bg-ink px-3 text-sm text-paper" }}
     >
       <Icon className="size-4" strokeWidth={1.75} aria-hidden />
       {item.label}
