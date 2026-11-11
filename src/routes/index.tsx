@@ -1,83 +1,105 @@
-import { createFileRoute, Link } from "@tanstack/react-router";
+import { createFileRoute, Link, Navigate } from "@tanstack/react-router";
+import { useEffect, useState } from "react";
 import { Shell } from "@/components/shell";
-import { formatMoney } from "@/lib/money";
-import { useBook } from "@/lib/book-store";
-import { confirmedCents, recordedCents } from "@/lib/jars";
-import { loanStanding, positionCents, remainingCents } from "@/lib/loans";
+import { Alert, Field, PrimaryButton, fieldClass } from "@/components/ui";
+import { OfflineHome } from "@/components/offline-home";
+import { useCurrentUserState } from "@/lib/auth/use-current-user";
+import { signOut } from "@/lib/auth/client";
+
+const staticHost = import.meta.env.BASE_URL === "/between-us/";
 
 export const Route = createFileRoute("/")({ component: Home });
 
 function Home() {
-  const book = useBook();
-  const you = book.people.find((person) => person.isYou) ?? book.people[0];
-  const position = you ? positionCents(book, you.id) : { owedToThem: 0, theyOwe: 0 };
-  const net = position.owedToThem - position.theyOwe;
-  const today = new Date().toISOString().slice(0, 10);
-  const openLoans = book.loans.filter((loan) => loanStanding(loan, book, today) === "open" || loanStanding(loan, book, today) === "overdue");
+  if (staticHost) return <OfflineHome />;
+  return <AccountHome />;
+}
+
+function AccountHome() {
+  const { user, isPending } = useCurrentUserState();
+  const [circles, setCircles] = useState<{ id: string; name: string }[]>([]);
+  const [name, setName] = useState("");
+  const [error, setError] = useState("");
+
+  useEffect(() => {
+    if (!user) return;
+    void fetch("/api/books/circles", { credentials: "include" })
+      .then((response) => response.json())
+      .then((body: { ok: boolean; circles?: { id: string; name: string }[]; error?: string }) => {
+        if (!body.ok) setError(body.error ?? "Could not load circles.");
+        else setCircles(body.circles ?? []);
+      })
+      .catch(() => setError("The book server is not reachable."));
+  }, [user]);
+
+  if (isPending) {
+    return (
+      <Shell mode="account">
+        <p className="text-muted">Checking your session…</p>
+      </Shell>
+    );
+  }
+  if (!user) return <Navigate to="/login" />;
+
+  async function createCircle() {
+    const response = await fetch("/api/books/circles", {
+      method: "POST",
+      credentials: "include",
+      headers: { "content-type": "application/json" },
+      body: JSON.stringify({ name }),
+    });
+    const body = (await response.json()) as { ok: boolean; id?: string; error?: string };
+    if (!body.ok || !body.id) {
+      setError(body.error ?? "Could not create the circle.");
+      return;
+    }
+    setName("");
+    setCircles((current) => [...current, { id: body.id as string, name: name.trim() }]);
+  }
 
   return (
-    <Shell>
+    <Shell mode="account">
       <header className="mb-6">
-        <p className="text-xs font-medium tracking-widest text-ember uppercase">This device</p>
-        <h1 className="mt-2 font-display text-4xl">{net === 0 ? "The book is quiet" : net > 0 ? "You’re owed" : "You owe"}</h1>
-        {net !== 0 ? <p className="mt-1 font-display text-5xl tabular-nums">{formatMoney(Math.abs(net))}</p> : null}
-        <p className="mt-3 max-w-md text-sm text-muted">
-          Loans and jar votes stay in this browser. Friends do not share a login here, and nothing on this page sends money.
+        <p className="text-xs font-medium tracking-widest text-ember uppercase">Signed in</p>
+        <h1 className="mt-2 font-display text-4xl">Your circles</h1>
+        <p className="mt-2 text-sm text-muted">
+          {user.primaryEmail}. Votes are your account, not a name picked on the page. Money still does not move.
         </p>
       </header>
-
-      <section className="mb-4 grid gap-3 sm:grid-cols-2">
-        <Link to="/loans" className="rounded-3xl border border-line bg-card p-4">
-          <p className="text-xs tracking-widest text-ember uppercase">Loans</p>
-          <p className="mt-2 font-display text-3xl">{openLoans.length}</p>
-          <p className="text-sm text-muted">Open or past due. Interest stays at zero.</p>
+      {error ? <Alert>{error}</Alert> : null}
+      <ul className="mb-4 flex flex-col gap-2">
+        {circles.length === 0 ? <li className="text-sm text-muted">No circles yet.</li> : null}
+        {circles.map((circle) => (
+          <li key={circle.id}>
+            <Link to="/circles/$circleId" params={{ circleId: circle.id }} className="block rounded-2xl border border-line bg-card px-4 py-3 font-medium">
+              {circle.name}
+            </Link>
+          </li>
+        ))}
+      </ul>
+      <form
+        className="mb-4 flex flex-col gap-3 sm:flex-row"
+        onSubmit={(event) => {
+          event.preventDefault();
+          void createCircle();
+        }}
+      >
+        <Field label="New circle">
+          <input className={fieldClass} value={name} onChange={(event) => setName(event.target.value)} placeholder="House" />
+        </Field>
+        <PrimaryButton type="submit" className="sm:mt-6">
+          Create
+        </PrimaryButton>
+      </form>
+      <div className="flex flex-wrap gap-3 text-sm">
+        <Link to="/offline" className="text-ember">
+          Offline notebook
         </Link>
-        <Link to="/jars" className="rounded-3xl border border-line bg-ink p-4 text-paper">
-          <p className="text-xs tracking-widest text-paper/70 uppercase">Shared jars</p>
-          <p className="mt-2 font-display text-3xl">{book.jars.length}</p>
-          <p className="text-sm text-paper/75">Recorded promises, not a wallet.</p>
-        </Link>
-      </section>
-
-      {book.jars.length === 0 ? (
-        <p className="mb-6 rounded-2xl border border-dashed border-line px-4 py-6 text-sm text-muted">
-          No shared jar yet. Open one, add the circle, and write down who promised what. Withdrawals need three other active members, and even then the money stays put.
-        </p>
-      ) : (
-        <ul className="mb-6 flex flex-col gap-2">
-          {book.jars.map((jar) => (
-            <li key={jar.id}>
-              <Link to="/jars/$jarId" params={{ jarId: jar.id }} className="block rounded-2xl border border-line bg-card px-4 py-3">
-                <span className="font-medium">{jar.name}</span>
-                <span className="mt-1 block text-sm text-muted">
-                  Recorded {formatMoney(recordedCents(book, jar.id))} · Confirmed {formatMoney(confirmedCents(book, jar.id))}
-                </span>
-              </Link>
-            </li>
-          ))}
-        </ul>
-      )}
-
-      <section>
-        <h2 className="mb-2 font-display text-2xl">Open loans</h2>
-        {openLoans.length === 0 ? (
-          <p className="text-sm text-muted">None yet. A loan here is a record of who lent whom, not a payment.</p>
-        ) : (
-          <ul className="flex flex-col gap-2">
-            {openLoans.map((loan) => (
-              <li key={loan.id}>
-                <Link to="/loans/$loanId" params={{ loanId: loan.id }} className="flex items-center justify-between rounded-2xl border border-line bg-card px-4 py-3">
-                  <span className="text-sm">
-                    {book.people.find((person) => person.id === loan.lenderId)?.name} lent{" "}
-                    {book.people.find((person) => person.id === loan.borrowerId)?.name}
-                  </span>
-                  <span className="font-medium tabular-nums">{formatMoney(remainingCents(loan, book))}</span>
-                </Link>
-              </li>
-            ))}
-          </ul>
-        )}
-      </section>
+        <button type="button" className="text-muted" onClick={() => void signOut()}>
+          Sign out
+        </button>
+      </div>
     </Shell>
   );
 }
+

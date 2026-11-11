@@ -2,6 +2,12 @@
 
 A jar is a friends’ pot inside a circle. “Circle” here means the people in this book, not a crypto network.
 
+## Signed-in circles
+
+On the server, a circle is a group of accounts. You add someone by the email they used to sign up. A jar member is an account, and the approve action uses the session cookie. The request body cannot name a different voter. Three other active accounts must approve the current amount, destination, purpose, and revision. Deactivating a member removes their yes from the count and does not lower the threshold of 3. The database transaction and a unique vote key stop a double yes. Policy approval still does not send money, and promised contributions stay distinct from provider-confirmed funds, which stay at zero.
+
+The offline notebook under Offline is a different book on one device. It is not authentication.
+
 ## On this device
 
 You can create a jar, set a goal, add and deactivate members, record promised contributions, and run a withdrawal vote. The book is `localStorage` key `between-us-book` in this browser. It is not synced to other people or other devices. Choosing someone’s name to “record a yes” is a notebook entry. It is not their password and it does not prove they agreed.

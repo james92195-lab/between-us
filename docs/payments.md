@@ -37,6 +37,12 @@ Bank linking, when it is eventually allowed, follows Dwolla’s Open Banking exc
 
 Dwolla documents that account-to-account transfers pass through a Dwolla wallet, explicitly or implicitly. That is Dwolla’s network hop, not this jar. Labels, balance funding sources, and virtual account numbers are not implemented. `jarDispatchAllowed()` always fails with `jar_custody_not_approved`.
 
+## Accounts
+
+Sign-in is this app’s Better Auth email and password. Passwords are hashed by that library. Session cookies are `__Host-` cookies: `Secure`, `Path=/`, no `Domain`, and HTTP-only. Cross-site scripted requests are rejected before a book is read. GitHub Pages does not run this API. The static build shows the offline notebook and says so.
+
+A hosted server needs `DATABASE_URL` (Postgres) and `VITE_AUTH_ENABLED=true`. Locally, with no `DATABASE_URL`, the same schema runs in embedded PGLite for the life of the server process. Set `DATABASE_URL` when the book has to survive a restart on a host. Do not put secrets in the repo.
+
 ## Hosting
 
 GitHub Pages can keep serving the static book. It cannot verify webhooks or hold API secrets.

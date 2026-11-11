@@ -61,15 +61,26 @@ export function validApproverIds(book: Book, request: WithdrawalRequest): string
   return [...ids];
 }
 
-export function withdrawalStanding(book: Book, request: WithdrawalRequest): WithdrawalStanding {
-  if (request.closed === "rejected") return "rejected";
-  if (request.closed === "cancelled") return "cancelled";
-  const eligible = eligibleApproverIds(book, request);
-  if (eligible.length < APPROVALS_REQUIRED) return "blocked";
-  const requesterActive = activeMemberIds(book, request.jarId).includes(request.requesterId);
-  if (!requesterActive) return "blocked";
-  if (validApproverIds(book, request).length >= APPROVALS_REQUIRED) return "policy_approved";
+export function policyStanding(input: {
+  closed: "rejected" | "cancelled" | null;
+  eligibleCount: number;
+  validYesCount: number;
+  requesterActive: boolean;
+}): WithdrawalStanding {
+  if (input.closed === "rejected") return "rejected";
+  if (input.closed === "cancelled") return "cancelled";
+  if (!input.requesterActive || input.eligibleCount < APPROVALS_REQUIRED) return "blocked";
+  if (input.validYesCount >= APPROVALS_REQUIRED) return "policy_approved";
   return "pending";
+}
+
+export function withdrawalStanding(book: Book, request: WithdrawalRequest): WithdrawalStanding {
+  return policyStanding({
+    closed: request.closed,
+    eligibleCount: eligibleApproverIds(book, request).length,
+    validYesCount: validApproverIds(book, request).length,
+    requesterActive: activeMemberIds(book, request.jarId).includes(request.requesterId),
+  });
 }
 
 export function recordedCents(book: Book, jarId: string): number {

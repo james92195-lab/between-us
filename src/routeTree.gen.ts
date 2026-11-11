@@ -12,12 +12,17 @@ import { Route as rootRouteImport } from './routes/__root'
 import { Route as IndexRouteImport } from './routes/index'
 import { Route as JarsRouteImport } from './routes/jars'
 import { Route as LoansRouteImport } from './routes/loans'
+import { Route as LoginRouteImport } from './routes/login'
+import { Route as OfflineRouteImport } from './routes/offline'
 import { Route as PaymentsRouteImport } from './routes/payments'
 import { Route as PeopleRouteImport } from './routes/people'
+import { Route as CirclesCircleIdRouteImport } from './routes/circles.$circleId'
 import { Route as JarsIndexRouteImport } from './routes/jars.index'
 import { Route as JarsJarIdRouteImport } from './routes/jars.$jarId'
 import { Route as LoansIndexRouteImport } from './routes/loans.index'
 import { Route as LoansLoanIdRouteImport } from './routes/loans.$loanId'
+import { Route as ApiAuthSplatRouteImport } from './routes/api/auth/$'
+import { Route as ApiBooksSplatRouteImport } from './routes/api/books/$'
 import { Route as ApiJarsWithdrawalsRouteImport } from './routes/api/jars/withdrawals'
 import { Route as ApiPaymentsStatusRouteImport } from './routes/api/payments/status'
 import { Route as ApiPaymentsDwollaWebhookRouteImport } from './routes/api/payments/dwolla/webhook'
@@ -37,6 +42,16 @@ const LoansRoute = LoansRouteImport.update({
   path: '/loans',
   getParentRoute: () => rootRouteImport,
 } as any)
+const LoginRoute = LoginRouteImport.update({
+  id: '/login',
+  path: '/login',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const OfflineRoute = OfflineRouteImport.update({
+  id: '/offline',
+  path: '/offline',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const PaymentsRoute = PaymentsRouteImport.update({
   id: '/payments',
   path: '/payments',
@@ -45,6 +60,11 @@ const PaymentsRoute = PaymentsRouteImport.update({
 const PeopleRoute = PeopleRouteImport.update({
   id: '/people',
   path: '/people',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const CirclesCircleIdRoute = CirclesCircleIdRouteImport.update({
+  id: '/circles/$circleId',
+  path: '/circles/$circleId',
   getParentRoute: () => rootRouteImport,
 } as any)
 const JarsIndexRoute = JarsIndexRouteImport.update({
@@ -67,6 +87,16 @@ const LoansLoanIdRoute = LoansLoanIdRouteImport.update({
   path: '/$loanId',
   getParentRoute: () => LoansRoute,
 } as any)
+const ApiAuthSplatRoute = ApiAuthSplatRouteImport.update({
+  id: '/api/auth/$',
+  path: '/api/auth/$',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const ApiBooksSplatRoute = ApiBooksSplatRouteImport.update({
+  id: '/api/books/$',
+  path: '/api/books/$',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const ApiJarsWithdrawalsRoute = ApiJarsWithdrawalsRouteImport.update({
   id: '/api/jars/withdrawals',
   path: '/api/jars/withdrawals',
@@ -88,24 +118,34 @@ export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
   '/jars': typeof JarsRouteWithChildren
   '/loans': typeof LoansRouteWithChildren
+  '/login': typeof LoginRoute
+  '/offline': typeof OfflineRoute
   '/payments': typeof PaymentsRoute
   '/people': typeof PeopleRoute
+  '/circles/$circleId': typeof CirclesCircleIdRoute
   '/jars/$jarId': typeof JarsJarIdRoute
   '/loans/$loanId': typeof LoansLoanIdRoute
   '/jars/': typeof JarsIndexRoute
   '/loans/': typeof LoansIndexRoute
+  '/api/auth/$': typeof ApiAuthSplatRoute
+  '/api/books/$': typeof ApiBooksSplatRoute
   '/api/jars/withdrawals': typeof ApiJarsWithdrawalsRoute
   '/api/payments/status': typeof ApiPaymentsStatusRoute
   '/api/payments/dwolla/webhook': typeof ApiPaymentsDwollaWebhookRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
+  '/login': typeof LoginRoute
+  '/offline': typeof OfflineRoute
   '/payments': typeof PaymentsRoute
   '/people': typeof PeopleRoute
+  '/circles/$circleId': typeof CirclesCircleIdRoute
   '/jars/$jarId': typeof JarsJarIdRoute
   '/loans/$loanId': typeof LoansLoanIdRoute
   '/jars': typeof JarsIndexRoute
   '/loans': typeof LoansIndexRoute
+  '/api/auth/$': typeof ApiAuthSplatRoute
+  '/api/books/$': typeof ApiBooksSplatRoute
   '/api/jars/withdrawals': typeof ApiJarsWithdrawalsRoute
   '/api/payments/status': typeof ApiPaymentsStatusRoute
   '/api/payments/dwolla/webhook': typeof ApiPaymentsDwollaWebhookRoute
@@ -115,12 +155,17 @@ export interface FileRoutesById {
   '/': typeof IndexRoute
   '/jars': typeof JarsRouteWithChildren
   '/loans': typeof LoansRouteWithChildren
+  '/login': typeof LoginRoute
+  '/offline': typeof OfflineRoute
   '/payments': typeof PaymentsRoute
   '/people': typeof PeopleRoute
+  '/circles/$circleId': typeof CirclesCircleIdRoute
   '/jars/$jarId': typeof JarsJarIdRoute
   '/loans/$loanId': typeof LoansLoanIdRoute
   '/jars/': typeof JarsIndexRoute
   '/loans/': typeof LoansIndexRoute
+  '/api/auth/$': typeof ApiAuthSplatRoute
+  '/api/books/$': typeof ApiBooksSplatRoute
   '/api/jars/withdrawals': typeof ApiJarsWithdrawalsRoute
   '/api/payments/status': typeof ApiPaymentsStatusRoute
   '/api/payments/dwolla/webhook': typeof ApiPaymentsDwollaWebhookRoute
@@ -131,24 +176,34 @@ export interface FileRouteTypes {
     | '/'
     | '/jars'
     | '/loans'
+    | '/login'
+    | '/offline'
     | '/payments'
     | '/people'
+    | '/circles/$circleId'
     | '/jars/$jarId'
     | '/loans/$loanId'
     | '/jars/'
     | '/loans/'
+    | '/api/auth/$'
+    | '/api/books/$'
     | '/api/jars/withdrawals'
     | '/api/payments/status'
     | '/api/payments/dwolla/webhook'
   fileRoutesByTo: FileRoutesByTo
   to:
     | '/'
+    | '/login'
+    | '/offline'
     | '/payments'
     | '/people'
+    | '/circles/$circleId'
     | '/jars/$jarId'
     | '/loans/$loanId'
     | '/jars'
     | '/loans'
+    | '/api/auth/$'
+    | '/api/books/$'
     | '/api/jars/withdrawals'
     | '/api/payments/status'
     | '/api/payments/dwolla/webhook'
@@ -157,12 +212,17 @@ export interface FileRouteTypes {
     | '/'
     | '/jars'
     | '/loans'
+    | '/login'
+    | '/offline'
     | '/payments'
     | '/people'
+    | '/circles/$circleId'
     | '/jars/$jarId'
     | '/loans/$loanId'
     | '/jars/'
     | '/loans/'
+    | '/api/auth/$'
+    | '/api/books/$'
     | '/api/jars/withdrawals'
     | '/api/payments/status'
     | '/api/payments/dwolla/webhook'
@@ -172,8 +232,13 @@ export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
   JarsRoute: typeof JarsRouteWithChildren
   LoansRoute: typeof LoansRouteWithChildren
+  LoginRoute: typeof LoginRoute
+  OfflineRoute: typeof OfflineRoute
   PaymentsRoute: typeof PaymentsRoute
   PeopleRoute: typeof PeopleRoute
+  CirclesCircleIdRoute: typeof CirclesCircleIdRoute
+  ApiAuthSplatRoute: typeof ApiAuthSplatRoute
+  ApiBooksSplatRoute: typeof ApiBooksSplatRoute
   ApiJarsWithdrawalsRoute: typeof ApiJarsWithdrawalsRoute
   ApiPaymentsStatusRoute: typeof ApiPaymentsStatusRoute
   ApiPaymentsDwollaWebhookRoute: typeof ApiPaymentsDwollaWebhookRoute
@@ -202,6 +267,20 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof LoansRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/login': {
+      id: '/login'
+      path: '/login'
+      fullPath: '/login'
+      preLoaderRoute: typeof LoginRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/offline': {
+      id: '/offline'
+      path: '/offline'
+      fullPath: '/offline'
+      preLoaderRoute: typeof OfflineRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/payments': {
       id: '/payments'
       path: '/payments'
@@ -214,6 +293,13 @@ declare module '@tanstack/react-router' {
       path: '/people'
       fullPath: '/people'
       preLoaderRoute: typeof PeopleRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/circles/$circleId': {
+      id: '/circles/$circleId'
+      path: '/circles/$circleId'
+      fullPath: '/circles/$circleId'
+      preLoaderRoute: typeof CirclesCircleIdRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/jars/': {
@@ -243,6 +329,20 @@ declare module '@tanstack/react-router' {
       fullPath: '/loans/$loanId'
       preLoaderRoute: typeof LoansLoanIdRouteImport
       parentRoute: typeof LoansRoute
+    }
+    '/api/auth/$': {
+      id: '/api/auth/$'
+      path: '/api/auth/$'
+      fullPath: '/api/auth/$'
+      preLoaderRoute: typeof ApiAuthSplatRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/api/books/$': {
+      id: '/api/books/$'
+      path: '/api/books/$'
+      fullPath: '/api/books/$'
+      preLoaderRoute: typeof ApiBooksSplatRouteImport
+      parentRoute: typeof rootRouteImport
     }
     '/api/jars/withdrawals': {
       id: '/api/jars/withdrawals'
@@ -296,8 +396,13 @@ const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
   JarsRoute: JarsRouteWithChildren,
   LoansRoute: LoansRouteWithChildren,
+  LoginRoute: LoginRoute,
+  OfflineRoute: OfflineRoute,
   PaymentsRoute: PaymentsRoute,
   PeopleRoute: PeopleRoute,
+  CirclesCircleIdRoute: CirclesCircleIdRoute,
+  ApiAuthSplatRoute: ApiAuthSplatRoute,
+  ApiBooksSplatRoute: ApiBooksSplatRoute,
   ApiJarsWithdrawalsRoute: ApiJarsWithdrawalsRoute,
   ApiPaymentsStatusRoute: ApiPaymentsStatusRoute,
   ApiPaymentsDwollaWebhookRoute: ApiPaymentsDwollaWebhookRoute,

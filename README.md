@@ -2,7 +2,9 @@
 
 Interest-free loans between friends, and a shared jar for money the circle means to pool.
 
-The book on this device can record who lent whom, manual repayments, jar members, promised contributions, and a withdrawal vote. It does not send bank transfers. Amounts are integer cents. A repayment you type is labeled as written down, not as a provider confirmation. Jar promises are not a spendable balance.
+Sign in with email and password. A circle is a group of those accounts. Loans, promised jar contributions, and withdrawal votes are stored in the database and tied to the signed-in member. The offline notebook is a separate on-device book and is not an account.
+
+The book does not send bank transfers. Amounts are integer cents. A repayment you type is labeled as written down, not as a provider confirmation. Jar promises are not a spendable balance.
 
 Friends do not share an account here. Names in the circle are not logins. “Circle” means that friends group, not a crypto network.
 
