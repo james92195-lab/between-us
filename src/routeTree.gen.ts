@@ -10,6 +10,7 @@
 
 import { Route as rootRouteImport } from './routes/__root'
 import { Route as IndexRouteImport } from './routes/index'
+import { Route as HealthzRouteImport } from './routes/healthz'
 import { Route as JarsRouteImport } from './routes/jars'
 import { Route as LoansRouteImport } from './routes/loans'
 import { Route as LoginRouteImport } from './routes/login'
@@ -31,6 +32,11 @@ import { Route as ApiPaymentsDwollaWebhookRouteImport } from './routes/api/payme
 const IndexRoute = IndexRouteImport.update({
   id: '/',
   path: '/',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const HealthzRoute = HealthzRouteImport.update({
+  id: '/healthz',
+  path: '/healthz',
   getParentRoute: () => rootRouteImport,
 } as any)
 const JarsRoute = JarsRouteImport.update({
@@ -122,6 +128,7 @@ const ApiPaymentsDwollaWebhookRoute =
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
+  '/healthz': typeof HealthzRoute
   '/jars': typeof JarsRouteWithChildren
   '/loans': typeof LoansRouteWithChildren
   '/login': typeof LoginRoute
@@ -142,6 +149,7 @@ export interface FileRoutesByFullPath {
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
+  '/healthz': typeof HealthzRoute
   '/login': typeof LoginRoute
   '/offline': typeof OfflineRoute
   '/payments': typeof PaymentsRoute
@@ -161,6 +169,7 @@ export interface FileRoutesByTo {
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
   '/': typeof IndexRoute
+  '/healthz': typeof HealthzRoute
   '/jars': typeof JarsRouteWithChildren
   '/loans': typeof LoansRouteWithChildren
   '/login': typeof LoginRoute
@@ -183,6 +192,7 @@ export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
   fullPaths:
     | '/'
+    | '/healthz'
     | '/jars'
     | '/loans'
     | '/login'
@@ -203,6 +213,7 @@ export interface FileRouteTypes {
   fileRoutesByTo: FileRoutesByTo
   to:
     | '/'
+    | '/healthz'
     | '/login'
     | '/offline'
     | '/payments'
@@ -221,6 +232,7 @@ export interface FileRouteTypes {
   id:
     | '__root__'
     | '/'
+    | '/healthz'
     | '/jars'
     | '/loans'
     | '/login'
@@ -242,6 +254,7 @@ export interface FileRouteTypes {
 }
 export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
+  HealthzRoute: typeof HealthzRoute
   JarsRoute: typeof JarsRouteWithChildren
   LoansRoute: typeof LoansRouteWithChildren
   LoginRoute: typeof LoginRoute
@@ -264,6 +277,13 @@ declare module '@tanstack/react-router' {
       path: '/'
       fullPath: '/'
       preLoaderRoute: typeof IndexRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/healthz': {
+      id: '/healthz'
+      path: '/healthz'
+      fullPath: '/healthz'
+      preLoaderRoute: typeof HealthzRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/jars': {
@@ -414,6 +434,7 @@ const LoansRouteWithChildren = LoansRoute._addFileChildren(LoansRouteChildren)
 
 const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
+  HealthzRoute: HealthzRoute,
   JarsRoute: JarsRouteWithChildren,
   LoansRoute: LoansRouteWithChildren,
   LoginRoute: LoginRoute,

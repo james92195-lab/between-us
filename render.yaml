@@ -1,0 +1,66 @@
+# Render Blueprint for Between Us.
+# Apply from the dashboard. This file does not create the service by itself.
+# Free Postgres expires — see docs/deploy-render.md.
+
+databases:
+  - name: between-us-db
+    plan: free
+    region: oregon
+    postgresMajorVersion: "16"
+    databaseName: between_us
+    user: between_us
+
+services:
+  - type: web
+    name: between-us
+    runtime: node
+    plan: free
+    region: oregon
+    healthCheckPath: /healthz
+    buildCommand: npm ci && npm run build:render
+    # preDeployCommand is paid-only. Free instances migrate in the start command.
+    # npm start migrates again; scripts/migrate.mjs skips files already applied.
+    startCommand: npm run db:migrate && npm start
+    envVars:
+      # New services default to Node 24. This app is built and tested on 22.
+      - key: NODE_VERSION
+        value: "22"
+      # Render requires the HTTP server on 0.0.0.0. Do not set PORT: Render
+      # injects it (default 10000) and the server binds that value.
+      - key: HOST
+        value: 0.0.0.0
+      - key: TRUST_PROXY
+        value: "1"
+      - key: DATABASE_URL
+        fromDatabase:
+          name: between-us-db
+          property: connectionString
+      - key: VITE_AUTH_ENABLED
+        value: "true"
+      - key: BETTER_AUTH_SECRET
+        generateValue: true
+      # Blueprint spec: a service may copy a default env var onto another key.
+      # RENDER_EXTERNAL_URL is one of those, and it is not on the exclusion list.
+      # If this copy is empty, the server uses RENDER_EXTERNAL_URL itself.
+      - key: BETTER_AUTH_URL
+        fromService:
+          name: between-us
+          type: web
+          envVarKey: RENDER_EXTERNAL_URL
+      # Present and blank. Transfers stay disabled. Do not fill these in.
+      - key: DWOLLA_ENVIRONMENT
+        value: ""
+      - key: DWOLLA_CLIENT_ID
+        value: ""
+      - key: DWOLLA_CLIENT_SECRET
+        value: ""
+      - key: DWOLLA_WEBHOOK_SECRET
+        value: ""
+      - key: DWOLLA_PLAID_EXCHANGE_PARTNER_HREF
+        value: ""
+      - key: DWOLLA_P2P_APPROVAL
+        value: ""
+      - key: DWOLLA_LAUNCH_COUNTRY
+        value: ""
+      - key: DWOLLA_SANDBOX_DISPATCH
+        value: ""

@@ -91,7 +91,10 @@ export const authConfigured =
 // it derives the origin per-request from the (proxied) host, validated against the
 // preview allowlist, which makes the OAuth `redirect_uri` the concrete preview URL
 // the broker's preview client accepts.
-const explicitBaseURL = env("BETTER_AUTH_URL");
+// Render injects RENDER_EXTERNAL_URL at runtime. A Blueprint copy onto
+// BETTER_AUTH_URL can be empty, so the public origin falls back to it.
+const renderOrigin = env("RENDER_EXTERNAL_URL");
+const explicitBaseURL = env("BETTER_AUTH_URL") ?? renderOrigin;
 // Explicit `string[]` (not a readonly tuple) — Better Auth's DynamicBaseURLConfig
 // requires a mutable `allowedHosts: string[]`.
 const previewAllowedHosts: string[] = [...PREVIEW_ALLOWED_HOSTS];
@@ -124,6 +127,7 @@ const trustedOrigins: string[] = explicitBaseURL
       ...previewAllowedHosts.flatMap((host) => [`https://${host}`, `http://${host}`]),
       ...LOCAL_DEV_ORIGINS,
     ];
+if (renderOrigin && !trustedOrigins.includes(renderOrigin)) trustedOrigins.push(renderOrigin);
 
 const databaseUrl = env("DATABASE_URL");
 

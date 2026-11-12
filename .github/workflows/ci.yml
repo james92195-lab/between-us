@@ -17,3 +17,49 @@ jobs:
       - run: npm run typecheck
       - run: npm test
       - run: npm run build
+
+  # Production server against a real Postgres: health, four accounts, 3-approval vote.
+  boot:
+    runs-on: ubuntu-latest
+    services:
+      postgres:
+        image: postgres:16
+        env:
+          POSTGRES_USER: postgres
+          POSTGRES_PASSWORD: postgres
+          POSTGRES_DB: between_us
+        ports:
+          - 5432:5432
+        options: >-
+          --health-cmd "pg_isready -U postgres -d between_us"
+          --health-interval 5s
+          --health-timeout 5s
+          --health-retries 20
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+      - run: npm ci
+      - name: Production Render build
+        run: npm run build:render
+        env:
+          VITE_AUTH_ENABLED: "true"
+      - name: Health, sign-up, and 3-approval withdrawal
+        env:
+          DATABASE_URL: postgres://postgres:postgres@localhost:5432/between_us
+          # Fixture for this job only. Render generates the real secret.
+          BETTER_AUTH_SECRET: ci-only-better-auth-secret-not-for-production
+          BETTER_AUTH_URL: http://127.0.0.1:8080
+          VITE_AUTH_ENABLED: "true"
+          HOST: 0.0.0.0
+          PORT: "8080"
+          TRUST_PROXY: "1"
+          BASE_URL: http://127.0.0.1:8080
+        run: |
+          node scripts/start-server.mjs > /tmp/between-us-server.log 2>&1 &
+          node scripts/render-boot.mjs
+      - name: Server log
+        if: always()
+        run: tail -n 200 /tmp/between-us-server.log || true
