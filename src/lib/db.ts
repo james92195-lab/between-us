@@ -46,6 +46,7 @@ export interface Sql {
  */
 const globalRef = globalThis as typeof globalThis & {
   __pgSqlPromise__?: Promise<Sql>;
+  __pgPool__?: import("pg").Pool;
   __pgliteInstance__?: Promise<import("@electric-sql/pglite").PGlite>;
   __pgliteMigrateChain__?: Promise<void>;
 };
@@ -94,6 +95,7 @@ function createNeonSql(): Promise<Sql> {
     types.setTypeParser(OID_DATE, identity);
     types.setTypeParser(OID_INTERVAL, identity);
     const pool = new Pool({ connectionString: databaseUrl });
+    globalRef.__pgPool__ = pool;
     return toSql(async <T>(text: string, params: unknown[]) => {
       const res = await pool.query(text, params);
       return res.rows as T[];
@@ -186,6 +188,37 @@ async function createSql(): Promise<Sql> {
  * Schema comes from `migrations/*.sql`, auto-applied before the first query on
  * both backends — define tables there, never inline in server functions.
  */
+/**
+ * Run `fn` on a single connection, committed only if `fn` resolves.
+ * Withdrawal votes and repayments use this so two requests cannot both insert
+ * the same decision.
+ */
+export async function withTransaction<T>(fn: (sql: Sql) => Promise<T>): Promise<T> {
+  if (dbSource === "pglite") {
+    const pg = await getPglite();
+    return pg.transaction(async (tx) =>
+      fn(toSql(async <TRow>(text: string, params: unknown[]) => (await tx.query<TRow>(text, params)).rows)),
+    );
+  }
+  await getSql();
+  const pool = globalRef.__pgPool__;
+  if (!pool) throw new Error("Postgres pool is not ready");
+  const client = await pool.connect();
+  try {
+    await client.query("begin");
+    const result = await fn(
+      toSql(async <TRow>(text: string, params: unknown[]) => (await client.query(text, params)).rows as TRow[]),
+    );
+    await client.query("commit");
+    return result;
+  } catch (err) {
+    await client.query("rollback");
+    throw err;
+  } finally {
+    client.release();
+  }
+}
+
 export function getSql(): Promise<Sql> {
   sqlPromise ??= createSql().catch((err) => {
     sqlPromise = null; // don't memoize failures — let the next call retry

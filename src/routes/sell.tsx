@@ -1,61 +1,83 @@
 import { createFileRoute } from "@tanstack/react-router";
-import { useState } from "react";
-import { useShallow } from "zustand/react/shallow";
-import { OfferCard, offerText } from "@/components/offer-card";
+import { useEffect, useState } from "react";
 import { Shell } from "@/components/shell";
-import { booksText, httpsUrl, parseCircle, type Circle, type Offer } from "@/lib/ledger";
-import { offerSearch } from "@/lib/offer-link";
+import { httpsUrl, offerSearch, type HostingOffer } from "@/lib/offer-link";
+import { formatMoney } from "@/lib/money";
 import { PAGES_URL, REPO_URL } from "@/lib/site";
-import { useLedger } from "@/lib/store";
+
+const STORAGE_KEY = "between-us-hosting-offer";
 
 export const Route = createFileRoute("/sell")({ component: SellPage });
 
+function readSaved(): HostingOffer {
+  const empty: HostingOffer = { priceCents: 0, cadence: "month", paymentUrl: "", pitch: "" };
+  if (typeof window === "undefined") return empty;
+  try {
+    const raw = localStorage.getItem(STORAGE_KEY);
+    if (!raw) return empty;
+    const parsed = JSON.parse(raw) as Partial<HostingOffer>;
+    return {
+      priceCents: Number.isInteger(parsed.priceCents) && (parsed.priceCents ?? 0) >= 0 ? (parsed.priceCents as number) : 0,
+      cadence: parsed.cadence === "once" ? "once" : "month",
+      paymentUrl: httpsUrl(parsed.paymentUrl ?? ""),
+      pitch: (parsed.pitch ?? "").slice(0, 280),
+    };
+  } catch {
+    return empty;
+  }
+}
+
 function SellPage() {
-  const offer = useLedger((s) => s.offer);
-  const setOffer = useLedger((s) => s.setOffer);
-  const replaceAll = useLedger((s) => s.replaceAll);
-  const circle = useLedger(
-    useShallow((s) => ({
-      people: s.people,
-      entries: s.entries,
-      causeName: s.causeName,
-      goalCents: s.goalCents,
-      offer: s.offer,
-    })),
-  );
-  const [price, setPrice] = useState(offer.priceCents ? (offer.priceCents / 100).toFixed(2) : "");
-  const [cadence, setCadence] = useState<Offer["cadence"]>(offer.cadence);
-  const [url, setUrl] = useState(offer.paymentUrl);
-  const [pitch, setPitch] = useState(offer.pitch);
+  const [price, setPrice] = useState("");
+  const [cadence, setCadence] = useState<HostingOffer["cadence"]>("month");
+  const [url, setUrl] = useState("");
+  const [pitch, setPitch] = useState("");
   const [message, setMessage] = useState("");
 
-  const dollars = price.trim() === "" ? 0 : Number(price.replace(/[$,]/g, ""));
-  const priceCents = Number.isFinite(dollars) && dollars >= 0 ? Math.round(dollars * 100) : offer.priceCents;
+  useEffect(() => {
+    const saved = readSaved();
+    if (!saved.priceCents && !saved.paymentUrl && !saved.pitch) return;
+    setPrice(saved.priceCents ? (saved.priceCents / 100).toFixed(2) : "");
+    setCadence(saved.cadence);
+    setUrl(saved.paymentUrl);
+    setPitch(saved.pitch);
+  }, []);
+
+  const cleaned = price.trim().replace(/[$,]/g, "");
+  const validPrice = cleaned === "" || /^\d+(\.\d{1,2})?$/.test(cleaned);
+  const priceCents = validPrice && cleaned !== "" ? Math.round(Number(cleaned) * 100) : 0;
   const safeUrl = httpsUrl(url);
-  const draft: Offer = {
-    priceCents: priceCents > 100_000_00 ? offer.priceCents : priceCents,
+  const draft: HostingOffer = {
+    priceCents: priceCents > 100_000_00 ? 0 : priceCents,
     cadence,
     paymentUrl: safeUrl,
     pitch: pitch.slice(0, 280),
   };
+  const ready = draft.priceCents > 0 && Boolean(draft.paymentUrl);
+  const publicLink = ready ? offerSearch(draft) : "";
+  const pitchText = [
+    "Between Us",
+    `${formatMoney(draft.priceCents)} ${draft.cadence === "month" ? "a month" : "once"} to keep the circle hosted.`,
+    draft.pitch,
+    draft.paymentUrl ? `Pay: ${draft.paymentUrl}` : "",
+    `Open the app: ${PAGES_URL}`,
+  ]
+    .filter(Boolean)
+    .join("\n");
 
   function save(): boolean {
     if (url.trim() && !safeUrl) {
       setMessage("Payment links have to start with https:// — Stripe, Ko-fi, GitHub Sponsors, or Venmo.");
       return false;
     }
-    if (price.trim() && !/^\d+(\.\d{1,2})?$/.test(price.trim().replace(/[$,]/g, ""))) {
+    if (!validPrice) {
       setMessage("Price should look like 8 or 8.00. Leave it blank to charge nothing.");
       return false;
     }
-    setOffer(draft);
-    setMessage("Offer saved on this device.");
+    localStorage.setItem(STORAGE_KEY, JSON.stringify(draft));
+    setMessage("Offer saved on this device. It is a hosting link, not a loan payment.");
     return true;
   }
-
-  const pitchText = offerText(draft, booksText({ ...circle, offer: draft }));
-  const ready = draft.priceCents > 0 && Boolean(draft.paymentUrl);
-  const publicLink = ready ? offerSearch(draft) : "";
 
   async function copyText(value: string, ok: string) {
     if (!save()) return;
@@ -77,8 +99,6 @@ function SellPage() {
           cards. People pay on the link you paste, then open the public copy.
         </p>
       </header>
-
-      <OfferCard offer={draft} />
 
       <section className="mb-5 rounded-3xl border border-line bg-card p-4">
         <label className="block">
@@ -131,18 +151,6 @@ function SellPage() {
         <button type="button" onClick={save} className="mt-3 h-11 rounded-full bg-ember px-5 text-sm font-medium text-paper">
           Save offer
         </button>
-        <button
-          type="button"
-          onClick={() => {
-            setPrice("8.00");
-            setCadence("month");
-            setPitch("Hosting, backups, and the occasional quiet fix so the books stay simple.");
-            setMessage("Sample filled in. Paste your own https payment link before you send it.");
-          }}
-          className="mt-3 ml-2 h-11 rounded-full border border-line px-4 text-sm"
-        >
-          Use $8 sample
-        </button>
       </section>
 
       <section className="mb-5">
@@ -158,7 +166,7 @@ function SellPage() {
           >
             Copy offer
           </button>
-          {publicLink && (
+          {publicLink ? (
             <button
               type="button"
               onClick={() =>
@@ -168,7 +176,7 @@ function SellPage() {
             >
               Copy public link
             </button>
-          )}
+          ) : null}
           <a
             href={`mailto:?subject=${encodeURIComponent("Between Us — hosting")}&body=${encodeURIComponent(
               publicLink ? `${pitchText}\n\nOpen and pay: ${publicLink}` : pitchText,
@@ -177,115 +185,30 @@ function SellPage() {
           >
             Email offer
           </a>
-          {draft.paymentUrl && (
-            <a
-              href={draft.paymentUrl}
-              target="_blank"
-              rel="noreferrer"
-              className="inline-flex h-11 items-center rounded-full bg-ink px-4 text-sm text-paper"
-            >
-              Open payment link
-            </a>
-          )}
         </div>
-        {publicLink && (
+        {publicLink ? (
           <p className="mt-3 text-sm break-all text-muted">
             Public link: <span className="text-ink">{publicLink}</span>
           </p>
-        )}
-        {message && <p className="mt-3 text-sm text-muted">{message}</p>}
+        ) : null}
+        {message ? <p className="mt-3 text-sm text-muted">{message}</p> : null}
       </section>
 
-      <section className="mb-5 rounded-3xl border border-line bg-card p-4">
+      <section className="rounded-3xl border border-line bg-card p-4">
         <h2 className="font-display text-2xl">Run it from GitHub</h2>
         <p className="mt-2 text-sm text-muted">
-          The public copy is live at{" "}
+          The public copy is at{" "}
           <a className="underline" href={PAGES_URL}>
             {PAGES_URL.replace("https://", "")}
           </a>
-          . A push to <span className="text-ink">main</span> rebuilds it. Paste a Stripe, Ko-fi, GitHub Sponsors, or
-          Venmo <span className="text-ink">https://</span> link, then copy the public offer link. Whoever opens that
-          link sees a Pay button. Loans stay interest-free — you are selling hosting, not the debt. Source:{" "}
+          . A push to <span className="text-ink">main</span> rebuilds it. The price rides in the link — Pages has no
+          database. Whoever opens that link sees a Pay button for hosting, not a loan settlement. Source:{" "}
           <a className="underline" href={REPO_URL}>
             james92195-lab/between-us
           </a>
-          , AGPL-3.0. If you serve a modified copy, people who use it can ask you for the source.
-        </p>
-        <p className="mt-3 text-sm text-muted">
-          Want your own domain? Import the same repo on Vercel. You do not need a database. Download the circle below if
-          you want a backup. Payments stay on the link above.
+          .
         </p>
       </section>
-
-      <Backup replaceAll={replaceAll} onMessage={setMessage} />
     </Shell>
-  );
-}
-
-function Backup({
-  replaceAll,
-  onMessage,
-}: {
-  replaceAll: (circle: Circle) => void;
-  onMessage: (message: string) => void;
-}) {
-  const snapshot = useLedger(
-    useShallow((s) => ({
-      people: s.people,
-      entries: s.entries,
-      causeName: s.causeName,
-      goalCents: s.goalCents,
-      offer: s.offer,
-    })),
-  );
-
-  function download() {
-    const blob = new Blob([JSON.stringify(snapshot, null, 2)], { type: "application/json" });
-    const url = URL.createObjectURL(blob);
-    const link = document.createElement("a");
-    link.href = url;
-    link.download = "between-us.json";
-    link.click();
-    URL.revokeObjectURL(url);
-  }
-
-  function onFile(file: File | undefined) {
-    if (!file) return;
-    const reader = new FileReader();
-    reader.onload = () => {
-      try {
-        const parsed = parseCircle(JSON.parse(String(reader.result)));
-        if (typeof parsed === "string") {
-          onMessage(parsed);
-          return;
-        }
-        replaceAll(parsed);
-        onMessage("Circle imported on this device.");
-      } catch {
-        onMessage("That file isn’t a Between Us circle.");
-      }
-    };
-    reader.readAsText(file);
-  }
-
-  return (
-    <section>
-      <h2 className="font-display text-2xl">Take the books with you</h2>
-      <p className="mt-1 mb-3 text-sm text-muted">Download the circle as a file, or bring one back. It never leaves this device otherwise.</p>
-      <div className="flex flex-wrap gap-2">
-        <button type="button" onClick={download} className="h-11 rounded-full border border-ink px-4 text-sm">
-          Download circle
-        </button>
-        <label className="inline-flex h-11 cursor-pointer items-center rounded-full border border-line bg-card px-4 text-sm">
-          Import circle
-          <input
-            type="file"
-            accept="application/json,.json"
-            className="sr-only"
-            onChange={(event) => onFile(event.target.files?.[0])}
-          />
-        </label>
-      </div>
-    </section>
   );
 }
