@@ -43,4 +43,8 @@ npm run build:pages
 
 That builds the static site GitHub Pages serves at [james92195-lab.github.io/between-us](https://james92195-lab.github.io/between-us/). Pushing to `main` rebuilds it. Pages is already set to **GitHub Actions**. The static copy is the offline notebook plus hosting-offer links. Sign-in and shared votes need a server with `DATABASE_URL` and `VITE_AUTH_ENABLED=true`.
 
+## Host on Render
+
+Sign in to Render with GitHub, choose **New > Blueprint**, pick this repo, and click **Apply**. The service is `https://between-us.onrender.com` unless that name is taken. Steps, the free-database expiry, and the one-click link are in [docs/deploy-render.md](docs/deploy-render.md). Pages keeps working as the offline notebook.
+
 Licensed under **AGPL-3.0**.
