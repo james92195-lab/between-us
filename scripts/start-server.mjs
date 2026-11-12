@@ -1,7 +1,10 @@
 #!/usr/bin/env node
 /**
  * Production start for Render (and the CI boot test).
- * Applies SQL migrations, then listens on HOST:PORT with the Nitro node server.
+ * Free instances cannot use a pre-deploy command, so this applies SQL
+ * migrations, then listens on HOST and Render's PORT. Re-running is safe:
+ * scripts/migrate.mjs records applied files in _migrations.
+ * An empty BETTER_AUTH_URL falls back to RENDER_EXTERNAL_URL before listen.
  */
 import { spawn } from "node:child_process";
 import { fileURLToPath } from "node:url";

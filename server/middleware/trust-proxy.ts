@@ -12,6 +12,8 @@ interface ProxyEvent {
 }
 
 function publicOrigin(): string | undefined {
+  // Same fallback as the auth server: an empty BETTER_AUTH_URL still means
+  // the Render public origin for CORS.
   const raw = process.env.BETTER_AUTH_URL?.trim() || process.env.RENDER_EXTERNAL_URL?.trim();
   if (!raw) return undefined;
   try {

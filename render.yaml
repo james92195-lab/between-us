@@ -18,11 +18,15 @@ services:
     region: oregon
     healthCheckPath: /healthz
     buildCommand: npm ci && npm run build:render
-    preDeployCommand: npm run db:migrate
-    startCommand: npm start
+    # preDeployCommand is paid-only. Free instances migrate in the start command.
+    # npm start migrates again; scripts/migrate.mjs skips files already applied.
+    startCommand: npm run db:migrate && npm start
     envVars:
+      # New services default to Node 24. This app is built and tested on 22.
       - key: NODE_VERSION
         value: "22"
+      # Render requires the HTTP server on 0.0.0.0. Do not set PORT: Render
+      # injects it (default 10000) and the server binds that value.
       - key: HOST
         value: 0.0.0.0
       - key: TRUST_PROXY
@@ -35,6 +39,9 @@ services:
         value: "true"
       - key: BETTER_AUTH_SECRET
         generateValue: true
+      # Blueprint spec: a service may copy a default env var onto another key.
+      # RENDER_EXTERNAL_URL is one of those, and it is not on the exclusion list.
+      # If this copy is empty, the server uses RENDER_EXTERNAL_URL itself.
       - key: BETTER_AUTH_URL
         fromService:
           name: between-us
