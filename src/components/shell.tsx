@@ -15,6 +15,8 @@ const NAV = [
   { to: "/payments", label: "Pay", icon: Wallet, exact: false },
 ] as const;
 
+const SOURCE_URL = "https://github.com/james92195-lab/between-us";
+
 const ACCOUNT_NAV = [
   { to: "/", label: "Home", icon: House, exact: true },
   { to: "/sell", label: "Sell", icon: BadgeDollarSign, exact: false },
@@ -47,9 +49,18 @@ export function Shell({ children, mode = "offline" }: { children: ReactNode; mod
             ? "Signed-in votes are stored for the circle. Three yeses still do not send a bank transfer."
             : "Offline notebook only. These names are not accounts."}
         </p>
+        <a href={SOURCE_URL} className="mt-3 px-3 text-sm text-ink underline underline-offset-4">
+          Source code
+        </a>
       </aside>
       <div className="mx-auto w-full max-w-2xl px-4 pt-5 pb-28 md:pt-8 md:pr-8 md:pb-16 md:pl-64">
-        <p className="mb-5 font-display text-2xl md:hidden">Between us</p>
+        <p className="font-display text-2xl md:hidden">Between us</p>
+        <a
+          href={SOURCE_URL}
+          className="mb-5 inline-block text-sm text-ink underline underline-offset-4 md:hidden"
+        >
+          Source code
+        </a>
         {mode === "offline" ? (
           <p className="mb-4 rounded-2xl border border-ember/30 bg-card px-3 py-2 text-sm">
             Offline notebook. These names are not accounts, and a yes here is not an approval. A shared jar with

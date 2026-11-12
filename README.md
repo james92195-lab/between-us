@@ -47,4 +47,30 @@ That builds the static site GitHub Pages serves at [james92195-lab.github.io/bet
 
 Sign in to Render with GitHub, choose **New > Blueprint**, pick this repo, and click **Apply**. The service is `https://between-us.onrender.com` unless that name is taken. Steps, the free-database expiry, and the one-click link are in [docs/deploy-render.md](docs/deploy-render.md). Pages keeps working as the offline notebook.
 
-Licensed under **AGPL-3.0**.
+## License
+
+Copyright (C) 2026 James Stevens
+
+This program is free software: you can redistribute it and/or modify it under the terms of the GNU Affero General Public License as published by the Free Software Foundation, either version 3 of the License, or (at your option) any later version (AGPL-3.0-or-later).
+
+This program is distributed in the hope that it will be useful, but WITHOUT ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the GNU Affero General Public License for more details.
+
+You should have received a copy of the GNU Affero General Public License along with this program. If not, see <https://www.gnu.org/licenses/>.
+
+The license text is [LICENSE](LICENSE).
+
+## Third-party notes
+
+- Outfit and Fraunces are loaded from Google Fonts. Both are under the SIL Open Font License 1.1.
+- lightningcss is MPL-2.0.
+- caniuse-lite is CC-BY-4.0.
+
+These files are Grok App Builder scaffolding. The app uses them (home-screen icon and the install page). Their license is not stated, and the AGPL grant above does not cover them:
+
+- `public/__grok/icon-180.png`
+- `public/__grok/install/assets/homescreen/logo-grok.svg`
+- `public/__grok/install/assets/homescreen/glass-puzzle.svg`
+- `public/__grok/install/assets/homescreen/glass-share.svg`
+- `public/__grok/install/assets/homescreen/plus.svg`
+- `public/__grok/install/assets/homescreen/ob-ipad.png`
+- `public/__grok/install/assets/homescreen/ob-phone.png`

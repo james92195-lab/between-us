@@ -1,6 +1,8 @@
 {
   "name": "between-us",
   "private": true,
+  "license": "AGPL-3.0-or-later",
+  "author": "James Stevens",
   "sideEffects": false,
   "type": "module",
   "overrides": {
