@@ -5,8 +5,7 @@ import { Alert, Field, PrimaryButton, fieldClass } from "@/components/ui";
 import { OfflineHome } from "@/components/offline-home";
 import { useCurrentUserState } from "@/lib/auth/use-current-user";
 import { signOut } from "@/lib/auth/client";
-
-const staticHost = import.meta.env.BASE_URL === "/between-us/";
+import { staticHost } from "@/lib/static-host";
 
 export const Route = createFileRoute("/")({ component: Home });
 

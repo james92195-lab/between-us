@@ -1,19 +1,23 @@
 import { Link } from "@tanstack/react-router";
-import { HandCoins, House, NotebookPen, PiggyBank, UsersRound, Wallet } from "lucide-react";
-import type { ReactNode } from "react";
-import { useBook } from "@/lib/book-store";
+import { BadgeDollarSign, HandCoins, House, NotebookPen, PiggyBank, UsersRound, Wallet } from "lucide-react";
+import { useEffect, useState, type ReactNode } from "react";
 import { useBookHydrated } from "@/components/use-book-hydrated";
+import { useBook } from "@/lib/book-store";
+import { formatMoney } from "@/lib/money";
+import { offerFromSearch, type HostingOffer } from "@/lib/offer-link";
 
 const NAV = [
   { to: "/", label: "Home", icon: House, exact: true },
   { to: "/loans", label: "Loans", icon: HandCoins, exact: false },
   { to: "/jars", label: "Jar", icon: PiggyBank, exact: false },
   { to: "/people", label: "Circle", icon: UsersRound, exact: false },
+  { to: "/sell", label: "Sell", icon: BadgeDollarSign, exact: false },
   { to: "/payments", label: "Pay", icon: Wallet, exact: false },
 ] as const;
 
 const ACCOUNT_NAV = [
   { to: "/", label: "Home", icon: House, exact: true },
+  { to: "/sell", label: "Sell", icon: BadgeDollarSign, exact: false },
   { to: "/offline", label: "Offline", icon: NotebookPen, exact: false },
 ] as const;
 
@@ -21,6 +25,13 @@ export function Shell({ children, mode = "offline" }: { children: ReactNode; mod
   const nav = mode === "account" ? ACCOUNT_NAV : NAV;
   const ready = useBookHydrated();
   const warning = useBook((state) => state.storageWarning);
+  const [offer, setOffer] = useState<HostingOffer | null>(null);
+
+  useEffect(() => {
+    const offered = offerFromSearch(window.location.search);
+    if (offered) setOffer(offered);
+  }, []);
+
   return (
     <div className="min-h-screen bg-paper text-ink">
       <aside className="fixed inset-y-0 left-0 z-20 hidden w-56 flex-col border-r border-line bg-card px-4 py-6 md:flex">
@@ -41,8 +52,26 @@ export function Shell({ children, mode = "offline" }: { children: ReactNode; mod
         <p className="mb-5 font-display text-2xl md:hidden">Between us</p>
         {mode === "offline" ? (
           <p className="mb-4 rounded-2xl border border-ember/30 bg-card px-3 py-2 text-sm">
-            Offline notebook. These names are not accounts, and a yes here is not an approval. A shared jar with signed-in friends needs the server. This public Pages copy cannot do that.
+            Offline notebook. These names are not accounts, and a yes here is not an approval. A shared jar with
+            signed-in friends needs the server. This public Pages copy cannot do that.
           </p>
+        ) : null}
+        {offer ? (
+          <a
+            href={offer.paymentUrl}
+            target="_blank"
+            rel="noreferrer"
+            className="mb-4 flex items-center justify-between gap-3 rounded-3xl bg-ember px-4 py-3 text-paper"
+          >
+            <span>
+              <span className="block text-xs tracking-widest uppercase">Hosting, not a loan</span>
+              <span className="font-display text-2xl">
+                {formatMoney(offer.priceCents)} {offer.cadence === "month" ? "a month" : "once"}
+              </span>
+              {offer.pitch ? <span className="mt-1 block text-sm text-paper/80">{offer.pitch}</span> : null}
+            </span>
+            <span className="inline-flex h-11 items-center rounded-full bg-paper px-4 text-sm text-ink">Pay</span>
+          </a>
         ) : null}
         {warning ? (
           <p role="alert" className="mb-4 rounded-2xl border border-ember/40 bg-ember/10 px-3 py-2 text-sm">
@@ -52,7 +81,7 @@ export function Shell({ children, mode = "offline" }: { children: ReactNode; mod
         {mode === "account" || ready ? children : <p className="text-muted">Opening the book…</p>}
       </div>
       <nav
-        className={`fixed inset-x-0 bottom-0 z-20 grid border-t border-line bg-card md:hidden ${mode === "account" ? "grid-cols-2" : "grid-cols-5"}`}
+        className={`fixed inset-x-0 bottom-0 z-20 grid border-t border-line bg-card md:hidden ${mode === "account" ? "grid-cols-3" : "grid-cols-6"}`}
       >
         {nav.map((item) => (
           <BottomLink key={item.to} item={item} />

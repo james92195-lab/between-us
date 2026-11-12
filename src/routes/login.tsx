@@ -3,10 +3,32 @@ import { useState } from "react";
 import { Shell } from "@/components/shell";
 import { Alert, Field, PrimaryButton, fieldClass } from "@/components/ui";
 import { authClient } from "@/lib/auth/client";
+import { staticHost } from "@/lib/static-host";
+import { Link } from "@tanstack/react-router";
 
 export const Route = createFileRoute("/login")({ component: LoginPage });
 
 function LoginPage() {
+  if (staticHost) return <StaticLogin />;
+  return <AccountLogin />;
+}
+
+function StaticLogin() {
+  return (
+    <Shell mode="offline">
+      <h1 className="font-display text-4xl">Sign-in needs the server</h1>
+      <p className="mt-2 text-sm text-muted">
+        This public copy is static. Accounts, shared jars, and votes are not available here. The notebook on this
+        device is not an account.
+      </p>
+      <Link to="/" className="mt-4 inline-flex text-ember">
+        Back to the notebook
+      </Link>
+    </Shell>
+  );
+}
+
+function AccountLogin() {
   const navigate = useNavigate();
   const [mode, setMode] = useState<"sign-in" | "sign-up">("sign-up");
   const [name, setName] = useState("");

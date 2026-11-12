@@ -5,6 +5,7 @@ import { Alert, Field, PrimaryButton, QuietButton, fieldClass } from "@/componen
 import { useCurrentUserState } from "@/lib/auth/use-current-user";
 import type { CircleSnapshot } from "@/lib/books/service";
 import { formatMoney, parseMoneyToCents } from "@/lib/money";
+import { staticHost } from "@/lib/static-host";
 
 export const Route = createFileRoute("/circles/$circleId")({ component: CirclePage });
 
@@ -20,6 +21,26 @@ async function post(path: string, body?: unknown): Promise<string | null> {
 }
 
 function CirclePage() {
+  if (staticHost) return <StaticCircle />;
+  return <AccountCircle />;
+}
+
+function StaticCircle() {
+  return (
+    <Shell mode="offline">
+      <h1 className="font-display text-4xl">Shared circles need the server</h1>
+      <p className="mt-2 text-sm text-muted">
+        This public copy cannot sign people in or store a vote. Open the notebook on this device, or use a hosted
+        server for accounts.
+      </p>
+      <Link to="/" className="mt-4 inline-flex text-ember">
+        Back to the notebook
+      </Link>
+    </Shell>
+  );
+}
+
+function AccountCircle() {
   const { circleId } = Route.useParams();
   const { user, isPending } = useCurrentUserState();
   const [snapshot, setSnapshot] = useState<CircleSnapshot | null>(null);

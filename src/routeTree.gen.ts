@@ -16,6 +16,7 @@ import { Route as LoginRouteImport } from './routes/login'
 import { Route as OfflineRouteImport } from './routes/offline'
 import { Route as PaymentsRouteImport } from './routes/payments'
 import { Route as PeopleRouteImport } from './routes/people'
+import { Route as SellRouteImport } from './routes/sell'
 import { Route as CirclesCircleIdRouteImport } from './routes/circles.$circleId'
 import { Route as JarsIndexRouteImport } from './routes/jars.index'
 import { Route as JarsJarIdRouteImport } from './routes/jars.$jarId'
@@ -60,6 +61,11 @@ const PaymentsRoute = PaymentsRouteImport.update({
 const PeopleRoute = PeopleRouteImport.update({
   id: '/people',
   path: '/people',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const SellRoute = SellRouteImport.update({
+  id: '/sell',
+  path: '/sell',
   getParentRoute: () => rootRouteImport,
 } as any)
 const CirclesCircleIdRoute = CirclesCircleIdRouteImport.update({
@@ -122,6 +128,7 @@ export interface FileRoutesByFullPath {
   '/offline': typeof OfflineRoute
   '/payments': typeof PaymentsRoute
   '/people': typeof PeopleRoute
+  '/sell': typeof SellRoute
   '/circles/$circleId': typeof CirclesCircleIdRoute
   '/jars/$jarId': typeof JarsJarIdRoute
   '/loans/$loanId': typeof LoansLoanIdRoute
@@ -139,6 +146,7 @@ export interface FileRoutesByTo {
   '/offline': typeof OfflineRoute
   '/payments': typeof PaymentsRoute
   '/people': typeof PeopleRoute
+  '/sell': typeof SellRoute
   '/circles/$circleId': typeof CirclesCircleIdRoute
   '/jars/$jarId': typeof JarsJarIdRoute
   '/loans/$loanId': typeof LoansLoanIdRoute
@@ -159,6 +167,7 @@ export interface FileRoutesById {
   '/offline': typeof OfflineRoute
   '/payments': typeof PaymentsRoute
   '/people': typeof PeopleRoute
+  '/sell': typeof SellRoute
   '/circles/$circleId': typeof CirclesCircleIdRoute
   '/jars/$jarId': typeof JarsJarIdRoute
   '/loans/$loanId': typeof LoansLoanIdRoute
@@ -180,6 +189,7 @@ export interface FileRouteTypes {
     | '/offline'
     | '/payments'
     | '/people'
+    | '/sell'
     | '/circles/$circleId'
     | '/jars/$jarId'
     | '/loans/$loanId'
@@ -197,6 +207,7 @@ export interface FileRouteTypes {
     | '/offline'
     | '/payments'
     | '/people'
+    | '/sell'
     | '/circles/$circleId'
     | '/jars/$jarId'
     | '/loans/$loanId'
@@ -216,6 +227,7 @@ export interface FileRouteTypes {
     | '/offline'
     | '/payments'
     | '/people'
+    | '/sell'
     | '/circles/$circleId'
     | '/jars/$jarId'
     | '/loans/$loanId'
@@ -236,6 +248,7 @@ export interface RootRouteChildren {
   OfflineRoute: typeof OfflineRoute
   PaymentsRoute: typeof PaymentsRoute
   PeopleRoute: typeof PeopleRoute
+  SellRoute: typeof SellRoute
   CirclesCircleIdRoute: typeof CirclesCircleIdRoute
   ApiAuthSplatRoute: typeof ApiAuthSplatRoute
   ApiBooksSplatRoute: typeof ApiBooksSplatRoute
@@ -293,6 +306,13 @@ declare module '@tanstack/react-router' {
       path: '/people'
       fullPath: '/people'
       preLoaderRoute: typeof PeopleRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/sell': {
+      id: '/sell'
+      path: '/sell'
+      fullPath: '/sell'
+      preLoaderRoute: typeof SellRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/circles/$circleId': {
@@ -400,6 +420,7 @@ const rootRouteChildren: RootRouteChildren = {
   OfflineRoute: OfflineRoute,
   PaymentsRoute: PaymentsRoute,
   PeopleRoute: PeopleRoute,
+  SellRoute: SellRoute,
   CirclesCircleIdRoute: CirclesCircleIdRoute,
   ApiAuthSplatRoute: ApiAuthSplatRoute,
   ApiBooksSplatRoute: ApiBooksSplatRoute,
