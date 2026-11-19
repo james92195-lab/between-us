@@ -3,6 +3,10 @@
  * Render by the start script), honor X-Forwarded-Proto and X-Forwarded-Host so
  * the request URL is the public https origin. Session cookies stay Secure.
  *
+ * This does not choose the client IP. Better Auth rate limits read
+ * `cf-connecting-ip` only when TRUST_PROXY=1 (`src/lib/auth/client-ip.ts`).
+ * The leftmost `x-forwarded-for` hop is client-controlled and is not used.
+ *
  * CORS allows only that public origin. The app is same-origin; this covers the
  * credentialed auth calls Better Auth makes from that host.
  */
